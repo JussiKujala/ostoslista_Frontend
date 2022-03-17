@@ -5,23 +5,49 @@ import axios from 'axios';
 const URL = 'http://localhost/ostoslistaBackend/'
 
 function App() {
+  const [item, setItem] = useState('');
+  const [items, setItems] = useState([]);
+  const [amount, setAmount] = useState('');
+  const [amounts, setAmounts] = useState([]);
 
-  const [items,setItems] = useState([]);
+  useEffect(() => {
+    axios.get(URL)
+      .then((response) => {
+        setItems(response.data);
+        setAmounts(response.data);
+      }).catch(error => {
+        alert(error.response ? error.response.data.error : error);
+      });
+  }, [])
 
-useEffect(() => {
-  axios.get(URL)
-  .then((response) => {
-    //console.log(response.data);
-    setItems(response.data);
-  }).catch(error =>{
-    alert(error);
+function save(e){
+  e.preventDefault();
+  const json = JSON.stringify({description:item,amount:amount});
+  console.log(json);
+  axios.post(URL + 'add.php',json, {
+    headers: {
+      'Content-Type' : 'application/json'
+    }
+  })
+  .then((response)=>{
+    setItems(items => [...items,response.data]);
+    setItem('');
+    setAmounts(amounts => [...amounts,response.data]);
+    setAmount('');
+  }).catch(error => {
+    alert(error.response ? error.response.data.error : error);
   });
-}, [])
-
+}
   return (
-    <div>
+    <div id="container">
+      <form onSubmit={save}>
+        <label>New Item</label>
+        <input placeholder='type description' value={item} onChange={e => setItem(e.target.value)} />
+        <input placeholder='type amount' value={amount} onChange={e => setAmount(e.target.value)}/>
+        <button>Add</button>
+      </form>
       <ol>
-        {items?.map(item =>(
+        {items?.map(item => (
           <li key={item.id}>{item.description} {item.amount}</li>
         ))}
       </ol>
