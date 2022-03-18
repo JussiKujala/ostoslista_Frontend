@@ -23,7 +23,6 @@ function App() {
 function save(e){
   e.preventDefault();
   const json = JSON.stringify({description:item,amount:amount});
-  console.log(json);
   axios.post(URL + 'add.php',json, {
     headers: {
       'Content-Type' : 'application/json'
@@ -38,19 +37,37 @@ function save(e){
     alert(error.response ? error.response.data.error : error);
   });
 }
+
+function remove(id){
+  const json = JSON.stringify({id:id})
+  axios.post(URL + 'delete.php',json,{
+    headers: {
+      'Content-Type' : 'application/json'
+    }
+  })
+  .then((response) => {
+    const newListWithoutRemoved = items.filter((item) => item.id !== id);
+    setItems(newListWithoutRemoved);
+  }).catch (error => {
+    alert(error.response ? error.response.data.error : error);
+  });
+}
+
   return (
     <div id="container">
       <form onSubmit={save}>
-        <label>New Item</label>
+        <label>New Item </label>
         <input placeholder='type description' value={item} onChange={e => setItem(e.target.value)} />
         <input placeholder='type amount' value={amount} onChange={e => setAmount(e.target.value)}/>
         <button>Add</button>
       </form>
-      <ol>
+      <ul>
         {items?.map(item => (
-          <li key={item.id}>{item.description} {item.amount}</li>
+          <li key={item.id}>{item.description} {item.amount}
+          <a href="#" onClick={() => remove(item.id)}>Delete</a>
+          </li>
         ))}
-      </ol>
+      </ul>
     </div>
   );
 }
